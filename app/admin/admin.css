@@ -1,0 +1,298 @@
+/* ── Panel admin SMA Citra Negara ─────────────────────────────────────────── */
+.adm {
+  --bg: #f3f4f6;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --ink: #0a1628;
+  --muted: #6b7280;
+  --green: #0b3d2e;
+  --green-2: #123524;
+  --gold: #c8973a;
+  --gold-dark: #b07d2e;
+  --danger: #dc2626;
+
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+.adm * { box-sizing: border-box; }
+
+/* Top bar */
+.adm-bar {
+  background: var(--green-2);
+  border-bottom: 2px solid var(--gold);
+  color: #fff;
+}
+.adm-bar-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+.adm-brand { font-weight: 800; font-size: 15px; white-space: nowrap; }
+.adm-brand span { color: var(--gold); }
+.adm-nav { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+.adm-nav a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+.adm-nav a:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.adm-nav a.active { background: var(--gold); color: #10261c; }
+.adm-logout {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.adm-logout:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* Banner DB */
+.adm-warn {
+  background: #fdf3d3;
+  border-bottom: 1px solid #efe0a8;
+  color: #7a5c07;
+  font-size: 13.5px;
+  padding: 12px 24px;
+  text-align: center;
+}
+.adm-warn code {
+  background: #f6e8b8;
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 12.5px;
+}
+
+/* Layout */
+.adm-main { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
+.adm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.adm-h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+.adm-sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+/* Cards */
+.adm-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+}
+.adm-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+a.adm-card { text-decoration: none; color: inherit; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; display: block; }
+a.adm-card:hover { border-color: var(--gold); box-shadow: 0 10px 28px rgba(10, 22, 40, 0.08); transform: translateY(-2px); }
+.adm-card h3 { font-size: 19px; font-weight: 800; margin-bottom: 6px; }
+.adm-card p { color: var(--muted); font-size: 13.5px; line-height: 1.6; }
+
+/* Buttons */
+.adm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--gold);
+  color: #10261c;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s;
+}
+.adm-btn:hover { background: var(--gold-dark); color: #fff; }
+.adm-btn:active { transform: scale(0.98); }
+.adm-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.adm-btn-ghost {
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+.adm-btn-ghost:hover { background: #f9fafb; color: var(--ink); border-color: #d1d5db; }
+.adm-btn-danger { background: #fff; border: 1px solid #f3c9c9; color: var(--danger); }
+.adm-btn-danger:hover { background: var(--danger); color: #fff; }
+.adm-btn-sm { padding: 7px 12px; font-size: 12.5px; border-radius: 8px; }
+
+/* Table / list */
+.adm-list { display: flex; flex-direction: column; gap: 10px; }
+.adm-row {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.adm-row-thumb {
+  width: 64px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #eef0f2;
+  flex-shrink: 0;
+}
+.adm-row-main { flex: 1; min-width: 0; }
+.adm-row-title { font-weight: 700; font-size: 14.5px; line-height: 1.4; }
+.adm-row-meta { color: var(--muted); font-size: 12.5px; margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+.adm-row-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.adm-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+}
+.adm-pill-off { background: #f3f4f6; color: #6b7280; }
+
+.adm-empty {
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  padding: 46px 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Forms */
+.adm-form { display: flex; flex-direction: column; gap: 18px; }
+.adm-field { display: flex; flex-direction: column; gap: 7px; }
+.adm-label { font-weight: 700; font-size: 13.5px; }
+.adm-label .req { color: var(--danger); }
+.adm-hint { color: var(--muted); font-size: 12px; }
+.adm-input,
+.adm-textarea,
+.adm-select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 11px 13px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--ink);
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.adm-input:focus,
+.adm-textarea:focus,
+.adm-select:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(200, 151, 58, 0.16);
+}
+.adm-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+.adm-textarea-lg { min-height: 200px; }
+.adm-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 640px) { .adm-row-2 { grid-template-columns: 1fr; } }
+
+.adm-check { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.adm-check input { width: 17px; height: 17px; accent-color: var(--gold); }
+
+.adm-form-actions { display: flex; gap: 10px; padding-top: 4px; }
+
+/* Image input */
+.adm-img { display: flex; flex-direction: column; gap: 10px; }
+.adm-img-top { display: flex; gap: 12px; align-items: flex-start; }
+.adm-img-preview {
+  width: 120px;
+  height: 90px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: #eef0f2;
+  flex-shrink: 0;
+}
+.adm-file-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.adm-file-btn:hover { border-color: var(--gold); }
+
+/* Feedback */
+.adm-alert {
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.adm-alert-err { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.adm-alert-ok { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+/* Login */
+.adm-login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(160deg, #0b3d2e, #13502f 60%, #1c7a45);
+}
+.adm-login {
+  background: #fff;
+  border-radius: 18px;
+  padding: 34px 32px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+}
+.adm-login h1 { font-size: 24px; font-weight: 800; }
+.adm-login p { color: var(--muted); font-size: 13.5px; margin: 4px 0 20px; }
+.adm-login-field { position: relative; margin-bottom: 14px; }
+.adm-login-field .adm-input { padding-right: 44px; }
+.adm-eye {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+}
+.adm-login .adm-btn { width: 100%; justify-content: center; }
+
+.adm-siswa-row { display: grid; grid-template-columns: 1fr 140px 40px; gap: 8px; align-items: center; }
+@media (max-width: 640px) { .adm-siswa-row { grid-template-columns: 1fr 1fr; } .adm-siswa-row .adm-x { grid-column: 1 / -1; } }
+.adm-x {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 8px;
+  height: 38px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 16px;
+}
+.adm-x:hover { border-color: var(--danger); color: var(--danger); }
