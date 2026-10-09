@@ -302,7 +302,7 @@ function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
 
   return (
     <span ref={ref} className="stat-num">
-      {val}
+      <span className="notranslate" translate="no">{val}</span>
       {suffix}
     </span>
   );

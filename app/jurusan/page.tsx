@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { SPMB_URL } from '@/lib/spmb';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -169,7 +170,7 @@ function StatTile({
         <stat.icon size={18} color={NAVY} />
       </span>
       <span className="jur-stat-num">
-        {count}
+        <span className="notranslate" translate="no">{count}</span>
         {stat.suffix}
       </span>
       <span className="jur-stat-lbl">{stat.label}</span>
@@ -299,7 +300,7 @@ function DetailPanel({ j }: { j: Jurusan }) {
           <Link href={j.href} className="jur-btn jur-btn-gold">
             Detail lengkap {j.kode} <ArrowUpRight size={16} />
           </Link>
-          <Link href="/spmb" className="jur-btn jur-btn-ghost">
+          <Link href={SPMB_URL} target="_blank" rel="noopener noreferrer" className="jur-btn jur-btn-ghost">
             Daftar Sekarang
           </Link>
         </div>

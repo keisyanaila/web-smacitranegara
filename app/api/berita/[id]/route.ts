@@ -2,7 +2,7 @@ import { sql } from '@/lib/db';
 import { isAuthed } from '@/lib/auth';
 import { guardWrite, readJson, bad } from '@/lib/api';
 import { checkFoto } from '@/lib/upload';
-import { getBeritaById, rowToBerita, slugify, BERITA_KATEGORI } from '@/lib/berita';
+import { getBeritaById, rowToBerita, slugify, BERITA_KATEGORI, PENULIS_DEFAULT } from '@/lib/berita';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -48,6 +48,7 @@ export async function PUT(request: Request, ctx: Ctx) {
     : new Date().toISOString().slice(0, 10);
   const ringkasan = String(body.ringkasan ?? '').trim();
   const konten = String(body.konten ?? '').trim();
+  const penulis = String(body.penulis ?? '').trim().slice(0, 80) || PENULIS_DEFAULT;
   const published = body.published !== false;
 
   const foto = checkFoto(body.foto);
@@ -65,7 +66,7 @@ export async function PUT(request: Request, ctx: Ctx) {
   const rows = await db`
     UPDATE berita SET
       slug = ${slug}, judul = ${judul}, tanggal = ${tanggal}, kategori = ${kategori},
-      ringkasan = ${ringkasan}, konten = ${konten}, foto = ${foto.value},
+      ringkasan = ${ringkasan}, konten = ${konten}, foto = ${foto.value}, penulis = ${penulis},
       published = ${published}, updated_at = now()
     WHERE id = ${id}
     RETURNING *`;

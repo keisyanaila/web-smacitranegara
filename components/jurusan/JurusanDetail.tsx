@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { SPMB_URL } from '@/lib/spmb';
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -228,7 +229,7 @@ export default function JurusanDetail({ data }: { data: JurusanDetailData }) {
               Kuota tiap peminatan terbatas. Amankan tempatmu lewat jalur SPMB.
             </p>
             <div className="jd-cta-actions">
-              <Link href="/spmb" className="jd-btn jd-btn-gold">
+              <Link href={SPMB_URL} target="_blank" rel="noopener noreferrer" className="jd-btn jd-btn-gold">
                 Daftar Sekarang <ArrowUpRight size={16} />
               </Link>
               <Link

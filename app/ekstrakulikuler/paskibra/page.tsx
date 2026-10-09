@@ -76,7 +76,7 @@ function useInView<T extends HTMLElement>(threshold = 0.2) {
 function Reveal({
   children, delay = 0, className = '', as: Tag = 'div',
 }: {
-  children: React.ReactNode; delay?: number; className?: string; as?: keyof JSX.IntrinsicElements;
+  children: React.ReactNode; delay?: number; className?: string; as?: keyof React.JSX.IntrinsicElements;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const Component = Tag as any;
@@ -116,7 +116,7 @@ function CountUp({ value, suffix = '' }: { value: string; suffix?: string }) {
 
   return (
     <div ref={ref} className="psk-stat-num">
-      {display}
+      <span className="notranslate" translate="no">{display}</span>
       {suffix}
     </div>
   );

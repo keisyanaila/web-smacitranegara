@@ -4,6 +4,7 @@ import { ArrowLeft, Award, Calendar } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { getPrestasiById, KATEGORI_COLOR } from '@/lib/prestasi';
+import { withPublicFoto } from '@/lib/foto';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,8 +25,9 @@ export default async function DetailPrestasiPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const item = await getPrestasiById(Number(id));
-  if (!item) notFound();
+  const raw = await getPrestasiById(Number(id));
+  if (!raw) notFound();
+  const item = withPublicFoto('prestasi', raw);
 
   const warna = KATEGORI_COLOR[item.kategori] ?? GOLD;
   const paragraf = item.deskripsi.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);

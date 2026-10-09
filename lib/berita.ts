@@ -12,6 +12,7 @@ export type BeritaItem = {
   ringkasan: string;
   foto: string;
   konten: string[];      // tiap elemen = 1 paragraf
+  penulis: string;
   published: boolean;
 };
 
@@ -22,6 +23,8 @@ export const KATEGORI_COLOR: Record<string, string> = {
 };
 
 export const BERITA_KATEGORI = ['Prestasi', 'Kegiatan', 'Pengumuman'] as const;
+
+export const PENULIS_DEFAULT = 'Humas SMA Citra Negara';
 
 // ── Helper ─────────────────────────────────────────────────────────────────
 function toISODate(v: unknown): string {
@@ -56,6 +59,7 @@ export function rowToBerita(r: any): BeritaItem {
     ringkasan: r.ringkasan ?? '',
     foto: r.foto ?? '',
     konten: splitParagraf(r.konten ?? ''),
+    penulis: r.penulis || PENULIS_DEFAULT,
     published: r.published !== false,
   };
 }
@@ -118,6 +122,7 @@ const SEED: BeritaItem[] = [
   href: `/berita/${s.slug}`,
   tanggalLabel: labelTanggal(s.tanggal),
   konten: splitParagraf(s.konten as unknown as string),
+  penulis: PENULIS_DEFAULT,
   published: true,
 }));
 

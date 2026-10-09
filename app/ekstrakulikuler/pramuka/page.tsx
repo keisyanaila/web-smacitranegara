@@ -116,7 +116,7 @@ function StatCounter({
 
   return (
     <div className="psk-stat">
-      <div className="psk-stat-num">{display}{suffix}</div>
+      <div className="psk-stat-num"><span className="notranslate" translate="no">{display}</span>{suffix}</div>
       <div className="psk-stat-label">{label}</div>
     </div>
   );

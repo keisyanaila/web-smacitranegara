@@ -2,9 +2,13 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
+import { useState, useEffect, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown } from 'lucide-react';
+import { SPMB_URL } from '@/lib/spmb';
+import LangSwitch from './LangSwitch';
+import { useLang } from '@/lib/lang';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -29,46 +33,134 @@ const TENTANG_LIST = [
   { nama: 'Staff & Guru',   href: '/gurustaff'  },
 ];
 
-const MOBILE_BP = 992;
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface Session {
-  role: string;
-  namaLengkap?: string;
-}
-
-// ─── Styles ──────────────────────────────────────────────────────────────────
-
-const styles = {
-  navLink: {
-    color: 'rgba(255,255,255,0.85)',
-    textDecoration: 'none',
-    padding: '8px 14px',
-    borderRadius: 6,
-    fontSize: 14,
-    fontWeight: 500,
-    transition: 'all 0.2s',
+// Label navbar per bahasa. Navbar diberi class "notranslate" supaya Google tidak
+// menerjemahkan ulang (hasil mesin kurang pas, mis. "Prestasi" → "Performance").
+const LABELS = {
+  id: {
+    beranda: 'Beranda', tentang: 'Tentang Kami', jurusan: 'Jurusan', eskul: 'Ekstrakurikuler',
+    prestasi: 'Prestasi', berita: 'Berita', daftar: 'Daftar Sekarang',
+    tagline: 'Pilihan Tepat di Sekolah yang MANTAP', eskulCount: '13+ EKSTRAKURIKULER',
+    tentangItems: ['Profil Sekolah', 'Staff & Guru'],
   },
-  btnPrimary: {
-    background: '#C8973A',
-    color: 'white',
-    border: 'none',
-    borderRadius: 6,
-    padding: '9px 20px',
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: 'pointer',
-    textDecoration: 'none',
-    transition: 'all 0.2s',
+  en: {
+    beranda: 'Home', tentang: 'About Us', jurusan: 'Programs', eskul: 'Extracurriculars',
+    prestasi: 'Achievements', berita: 'News', daftar: 'Register Now',
+    tagline: 'The Right Choice for a Great School', eskulCount: '13+ EXTRACURRICULARS',
+    tentangItems: ['School Profile', 'Teachers & Staff'],
   },
 };
+
+const MOBILE_BP = 992;
+const noopSubscribe = () => () => {};
+const GOLD = 'linear-gradient(135deg, #F2CB66 0%, #D9A441 100%)';
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const CSS = `
   @keyframes dropFadeIn {
     from { opacity: 0; transform: translateY(-8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+
+  /* ── Bar melayang ── */
+  .nav-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 88px;
+    margin-bottom: -88px;      /* melayang di atas hero, tidak mendorong konten */
+    padding: 12px 16px 0;
+    pointer-events: none;
+  }
+  .nav-bar {
+    pointer-events: auto;
+    max-width: 1240px;
+    height: 66px;
+    margin: 0 auto;
+    padding: 0 14px 0 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-radius: 18px;
+    background: rgba(9, 38, 27, 0.78);
+    border: 1px solid rgba(200, 151, 58, 0.28);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .nav-bar.is-scrolled { background: rgba(8, 33, 24, 0.94); box-shadow: 0 14px 36px rgba(0, 0, 0, 0.3); }
+
+  .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
+  .nav-brand-name { color: #fff; font-weight: 800; font-size: 16px; line-height: 1.2; }
+  .nav-brand-tag { color: #C8973A; font-size: 11px; font-weight: 500; }
+
+  .desktop-nav { display: flex; align-items: center; gap: 2px; }
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 13px;
+    border: none;
+    border-radius: 10px;
+    background: none;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+  }
+  .nav-link:hover, .nav-link.is-active, .nav-link[aria-expanded="true"] { color: #E8B84B; background: rgba(255, 255, 255, 0.06); }
+  .nav-link .chev { transition: transform 0.2s; }
+  .nav-link[aria-expanded="true"] .chev { transform: rotate(180deg); }
+
+  .desktop-auth { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 22px;
+    border-radius: 999px;
+    background: ${GOLD};
+    color: #1A1408;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 6px 18px rgba(217, 164, 65, 0.35);
+    transition: transform 0.15s, filter 0.2s, box-shadow 0.2s;
+  }
+  .nav-cta:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 10px 24px rgba(217, 164, 65, 0.45); }
+
+  /* ── Switch ID / EN ── */
+  .lang-switch {
+    display: inline-flex;
+    padding: 3px;
+    gap: 2px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    flex-shrink: 0;
+  }
+  .lang-switch button {
+    min-width: 34px;
+    padding: 5px 9px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .lang-switch button:hover:not(.is-active) { color: #fff; }
+  .lang-switch button.is-active { background: ${GOLD}; color: #1A1408; }
+
   .eskul-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -90,27 +182,21 @@ const CSS = `
   }
   .eskul-text-item:hover { background: #FAF7F0; }
   .tentang-list { display: flex; flex-direction: column; gap: 2px; }
-  .desktop-nav { display: flex; align-items: center; gap: 4px; }
-  .desktop-auth { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-  .mobile-toggle { display: none; }
 
-  @media (max-width: ${MOBILE_BP}px) {
-    .desktop-nav  { display: none; }
-    .desktop-auth { display: none; }
-    .mobile-toggle { display: inline-flex; }
-  }
-
-  /* ── Animated hamburger ── */
-  .hamburger {
-    position: relative;
-    width: 26px;
-    height: 18px;
-    background: none;
-    border: none;
+  /* ── Tombol menu (hamburger) ── */
+  .mobile-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.05);
     cursor: pointer;
-    padding: 0;
     flex-shrink: 0;
   }
+  .hamburger { position: relative; width: 20px; height: 14px; }
   .hamburger span {
     position: absolute;
     left: 0;
@@ -118,16 +204,23 @@ const CSS = `
     height: 2px;
     border-radius: 2px;
     background: #fff;
-    transition: transform 0.3s ease, opacity 0.2s ease, top 0.3s ease;
   }
   .hamburger span:nth-child(1) { top: 0; }
-  .hamburger span:nth-child(2) { top: 8px; }
-  .hamburger span:nth-child(3) { top: 16px; }
-  .hamburger.is-open span:nth-child(1) { top: 8px; transform: rotate(45deg); }
-  .hamburger.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-  .hamburger.is-open span:nth-child(3) { top: 8px; transform: rotate(-45deg); }
+  .hamburger span:nth-child(2) { top: 6px; }
+  .hamburger span:nth-child(3) { top: 12px; }
 
-  /* ── Mobile drawer ── */
+  @media (max-width: ${MOBILE_BP}px) {
+    .desktop-nav  { display: none; }
+    .desktop-auth { display: none; }
+    .mobile-toggle { display: inline-flex; }
+    .nav-wrap { height: 78px; margin-bottom: -78px; padding: 10px 12px 0; }
+    .nav-bar { height: 60px; padding: 0 10px 0 14px; border-radius: 16px; }
+  }
+  @media (max-width: 420px) {
+    .nav-brand-tag { display: none; }
+  }
+
+  /* ── Panel menu HP (melayang) ── */
   .drawer-root {
     position: fixed;
     inset: 0;
@@ -139,7 +232,7 @@ const CSS = `
   .drawer-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(4,20,14,0.55);
+    background: rgba(4, 20, 14, 0.55);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     opacity: 0;
@@ -149,56 +242,59 @@ const CSS = `
 
   .drawer {
     position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: min(360px, 86vw);
+    top: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: min(390px, calc(100vw - 20px));
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, #0B3D2E 0%, #082A20 100%);
-    box-shadow: -14px 0 44px rgba(0,0,0,0.4);
-    transform: translateX(100%);
-    transition: transform 0.34s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 22px;
+    border: 1px solid rgba(200, 151, 58, 0.35);
+    background: linear-gradient(180deg, #0D3326 0%, #08231A 100%);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateX(24px) scale(0.98);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
   }
-  .drawer-root.is-open .drawer { transform: translateX(0); }
+  .drawer-root.is-open .drawer { opacity: 1; transform: none; }
 
   .drawer-head {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 18px 20px;
-    border-bottom: 1px solid rgba(200,151,58,0.22);
+    gap: 10px;
+    padding: 14px 14px 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
+  .drawer-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex: 1; min-width: 0; }
+  .drawer-brand span { color: #fff; font-weight: 800; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .drawer-close {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.04);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.05);
     color: #fff;
     cursor: pointer;
+    flex-shrink: 0;
     transition: background 0.2s, transform 0.15s;
   }
-  .drawer-close:hover { background: rgba(200,151,58,0.18); }
+  .drawer-close:hover { background: rgba(200, 151, 58, 0.18); }
   .drawer-close:active { transform: scale(0.94); }
 
   .drawer-body {
     flex: 1;
     overflow-y: auto;
-    padding: 8px 20px 16px;
+    padding: 14px 14px 16px;
     overscroll-behavior: contain;
   }
 
   .drawer-foot {
-    padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px));
-    border-top: 1px solid rgba(200,151,58,0.22);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .m-item {
@@ -207,28 +303,25 @@ const CSS = `
     justify-content: space-between;
     gap: 10px;
     width: 100%;
-    padding: 14px 6px;
+    padding: 13px 12px;
     border: none;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
     background: none;
-    color: rgba(255,255,255,0.9);
+    color: #fff;
     font-family: inherit;
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 15.5px;
+    font-weight: 700;
     text-align: left;
     text-decoration: none;
     cursor: pointer;
-    border-radius: 8px;
-    transition: color 0.2s, background 0.2s, padding-left 0.2s;
+    border-radius: 12px;
+    transition: color 0.2s, background 0.2s;
   }
-  .m-item:hover, .m-item:focus-visible {
+  .m-item:hover, .m-item:focus-visible, .m-item.is-active {
     color: #E8B84B;
-    background: rgba(200,151,58,0.10);
-    padding-left: 12px;
+    background: rgba(255, 255, 255, 0.05);
     outline: none;
   }
-  .m-item:active { transform: scale(0.99); }
-  .m-item .chev { transition: transform 0.3s ease; color: #C8973A; flex-shrink: 0; }
+  .m-item .chev { transition: transform 0.3s ease; color: #E8B84B; flex-shrink: 0; }
   .m-item.is-open .chev { transform: rotate(180deg); }
 
   .m-sub {
@@ -242,47 +335,46 @@ const CSS = `
     display: flex;
     flex-direction: column;
     gap: 2px;
-    margin: 4px 0 8px 6px;
-    padding: 4px 0 4px 14px;
-    border-left: 2px solid rgba(200,151,58,0.4);
+    margin: 2px 0 8px 14px;
+    padding: 2px 0 2px 12px;
+    border-left: 2px solid rgba(200, 151, 58, 0.4);
   }
   .m-sub-link {
-    padding: 11px 10px;
+    padding: 10px;
     border-radius: 8px;
-    color: rgba(255,255,255,0.72);
+    color: rgba(255, 255, 255, 0.72);
     text-decoration: none;
-    font-size: 13.5px;
+    font-size: 14px;
+    font-weight: 500;
     transition: background 0.15s, color 0.15s;
   }
   .m-sub-link:hover, .m-sub-link:focus-visible {
-    background: rgba(200,151,58,0.14);
+    background: rgba(200, 151, 58, 0.14);
     color: #E8B84B;
     outline: none;
   }
 
-  .m-btn {
+  .m-cta {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 13px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
+    padding: 15px;
+    border-radius: 14px;
+    background: ${GOLD};
+    color: #1A1408;
+    font-size: 15px;
+    font-weight: 700;
     text-decoration: none;
-    cursor: pointer;
-    font-family: inherit;
-    transition: transform 0.15s, filter 0.2s, background 0.2s;
+    box-shadow: 0 8px 20px rgba(217, 164, 65, 0.3);
+    transition: transform 0.15s, filter 0.2s;
   }
-  .m-btn:active { transform: scale(0.98); }
-  .m-btn-solid { background: #C8973A; color: #fff; border: none; }
-  .m-btn-solid:hover { filter: brightness(1.06); }
-  .m-btn-ghost {
-    background: transparent;
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.28);
+  .m-cta:hover { filter: brightness(1.05); }
+  .m-cta:active { transform: scale(0.98); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .drawer, .drawer-backdrop, .m-sub { transition: none; }
   }
-  .m-btn-ghost:hover { background: rgba(255,255,255,0.08); }
 `;
 
 // ─── Desktop sub-components ──────────────────────────────────────────────────
@@ -312,7 +404,7 @@ function DropdownPanel({ children, triggerRef, panelWidth = 480, id }: {
 
       setStyle({
         position: 'fixed',
-        top: triggerRect.bottom + 10,
+        top: triggerRect.bottom + 18,
         left,
         width,
         visibility: 'visible',
@@ -339,6 +431,8 @@ function DropdownPanel({ children, triggerRef, panelWidth = 480, id }: {
         animation: 'dropFadeIn 0.15s ease',
       }}
       data-dropdown={id}
+      className="notranslate"
+      translate="no"
       role="menu"
       aria-label={`${id} dropdown`}
     >
@@ -363,38 +457,24 @@ function DropdownPanel({ children, triggerRef, panelWidth = 480, id }: {
 }
 
 function NavButton({
-  label, isOpen, onClick, ariaControls,
+  label, isOpen, onClick, ariaControls, active,
 }: {
   label: string;
   isOpen: boolean;
   onClick: () => void;
   ariaControls: string;
+  active: boolean;
 }) {
   return (
     <button
       onClick={onClick}
-      style={{
-        ...styles.navLink,
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 5,
-        color: isOpen ? '#C8973A' : 'rgba(255,255,255,0.85)',
-      }}
+      className={`nav-link${active ? ' is-active' : ''}`}
       aria-expanded={isOpen}
       aria-haspopup="true"
       aria-controls={ariaControls}
     >
       {label}
-      <ChevronDown
-        size={14}
-        style={{
-          transition: 'transform 0.2s',
-          transform: isOpen ? 'rotate(180deg)' : 'rotate(0)',
-        }}
-      />
+      <ChevronDown size={14} className="chev" />
     </button>
   );
 }
@@ -436,20 +516,25 @@ function MobileAccordion({
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function Navbar() {
-  const [mounted, setMounted] = useState(false);
+  const pathname = usePathname() ?? '/';
+  const t = LABELS[useLang()];
+  const tentangList = TENTANG_LIST.map((it, i) => ({ ...it, nama: t.tentangItems[i] }));
+  // true hanya di browser (portal drawer butuh document.body)
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [eskulOpen, setEskulOpen] = useState(false);
   const [mobileEskul, setMobileEskul] = useState(false);
   const [tentangOpen, setTentangOpen] = useState(false);
   const [mobileTentang, setMobileTentang] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const eskulRef = useRef<HTMLDivElement>(null);
   const tentangRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => setMounted(true), []);
+  const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
+  const tentangActive = TENTANG_LIST.some(it => isActive(it.href));
+  const eskulActive = pathname.startsWith('/ekstrakulikuler');
+
 
   // Scroll listener
   useEffect(() => {
@@ -457,26 +542,6 @@ export default function Navbar() {
     onScroll();
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  // Session fetch
-  useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const response = await fetch('/api/auth/me', {
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!response.ok) throw new Error('Failed to fetch session');
-        const data = await response.json();
-        if (data.user) setSession(data.user);
-      } catch (error) {
-        console.error('Session fetch error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSession();
   }, []);
 
   // Close desktop dropdowns on outside click
@@ -518,237 +583,139 @@ export default function Navbar() {
     };
   }, [mobileOpen]);
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!response.ok) throw new Error('Logout failed');
-      setSession(null);
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Logout error:', error);
-      window.location.href = '/';
-    }
-  };
-
   const closeMobile = () => {
     setMobileOpen(false);
     setMobileEskul(false);
     setMobileTentang(false);
   };
 
-  const dashboardHref = session?.role === 'admin' ? '/admin/dashboard' : '/dashboard';
-
   return (
     <>
       <style>{CSS}</style>
 
-      <nav
-        style={{
-          background: scrolled ? '#145A45' : '#0B3D2E',
-          borderBottom: '2px solid #C8973A',
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-          transition: 'background 0.3s',
-        }}
-        role="navigation"
-        aria-label="Main navigation"
-      >
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 70 }}>
-
-            {/* ── Logo ── */}
-            <Link
-              href="/"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                textDecoration: 'none',
-                flexShrink: 0,
-              }}
-              aria-label="SMA Citra Negara - Beranda"
-            >
-              <div style={{ width: 46, height: 44 }}>
-                <Image
-                  src="/images/logosma.png"
-                  alt="Logo SMA Citra Negara"
-                  width={44}
-                  height={44}
-                  style={{ objectFit: 'contain' }}
-                  priority
-                />
-              </div>
-              <div>
-                <div style={{ color: 'white', fontWeight: 800, fontSize: 16, lineHeight: 1.2 }}>
-                  SMA Citra Negara
-                </div>
-                <div style={{ color: '#C8973A', fontSize: 11, fontWeight: 500 }}>
-                  Pilihan Tepat di Sekolah yang MANTAP
-                </div>
-              </div>
-            </Link>
-
-            {/* ── Desktop Nav ── */}
-            <div className="desktop-nav">
-              <NavLink href="/">Beranda</NavLink>
-
-              <div ref={tentangRef} style={{ position: 'relative' }}>
-                <NavButton
-                  label="Tentang Kami"
-                  isOpen={tentangOpen}
-                  onClick={() => setTentangOpen(v => !v)}
-                  ariaControls="tentang-dropdown"
-                />
-                {tentangOpen && (
-                  <DropdownPanel triggerRef={tentangRef} panelWidth={220} id="tentang">
-                    <div className="tentang-list">
-                      {TENTANG_LIST.map(t => (
-                        <Link
-                          key={t.nama}
-                          href={t.href}
-                          className="eskul-text-item"
-                          onClick={() => setTentangOpen(false)}
-                        >
-                          {t.nama}
-                        </Link>
-                      ))}
-                    </div>
-                  </DropdownPanel>
-                )}
-              </div>
-
-              <NavLink href="/jurusan">Bidang Studi</NavLink>
-
-              <div ref={eskulRef} style={{ position: 'relative' }}>
-                <NavButton
-                  label="Ekstrakurikuler"
-                  isOpen={eskulOpen}
-                  onClick={() => setEskulOpen(v => !v)}
-                  ariaControls="eskul-dropdown"
-                />
-                {eskulOpen && (
-                  <DropdownPanel triggerRef={eskulRef} panelWidth={480} id="eskul">
-                    <p style={{
-                      fontSize: 11,
-                      color: '#9CA3AF',
-                      fontWeight: 700,
-                      letterSpacing: 1,
-                      marginBottom: 12,
-                      paddingLeft: 2,
-                    }}>
-                      13+ EKSTRAKURIKULER
-                    </p>
-                    <div className="eskul-grid">
-                      {ESKUL_LIST.map(e => (
-                        <Link
-                          key={e.nama}
-                          href={e.href}
-                          className="eskul-text-item"
-                          onClick={() => setEskulOpen(false)}
-                        >
-                          {e.nama}
-                        </Link>
-                      ))}
-                    </div>
-                  </DropdownPanel>
-                )}
-              </div>
-
-              <NavLink href="/prestasi">Prestasi</NavLink>
-              <NavLink href="/berita">Berita</NavLink>
-              <NavLink href="/spmb">SPMB</NavLink>
+      <header className="nav-wrap notranslate" translate="no">
+        <nav
+          className={`nav-bar${scrolled ? ' is-scrolled' : ''}`}
+          role="navigation"
+          aria-label="Main navigation"
+        >
+          {/* ── Logo ── */}
+          <Link href="/" className="nav-brand" aria-label="SMA Citra Negara - Beranda">
+            <Image
+              src="/images/logosma.png"
+              alt="Logo SMA Citra Negara"
+              width={42}
+              height={42}
+              style={{ objectFit: 'contain' }}
+              loading="eager"
+            />
+            <div>
+              <div className="nav-brand-name notranslate" translate="no">SMA Citra Negara</div>
+              <div className="nav-brand-tag">{t.tagline}</div>
             </div>
+          </Link>
 
-            {/* ── Auth Buttons (Desktop) ── */}
-            <div className="desktop-auth">
-              {isLoading ? (
-                <div style={{ width: 100, height: 30, background: 'rgba(255,255,255,0.1)', borderRadius: 6 }} />
-              ) : session ? (
-                <>
-                  <Link
-                    href={dashboardHref}
-                    style={{ color: '#C8973A', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}
-                  >
-                    {session.namaLengkap || 'Dashboard'}
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    style={{
-                      background: 'transparent',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      color: 'rgba(255,255,255,0.7)',
-                      padding: '7px 16px',
-                      borderRadius: 6,
-                      cursor: 'pointer',
-                      fontSize: 13,
-                      transition: 'all 0.2s',
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    Keluar
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    style={{
-                      color: 'rgba(255,255,255,0.8)',
-                      textDecoration: 'none',
-                      fontSize: 14,
-                      fontWeight: 500,
-                      padding: '8px 16px',
-                      transition: 'color 0.2s',
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = '#C8973A'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
-                  >
-                    Masuk
-                  </Link>
-                  <Link
-                    href="/register"
-                    style={{ ...styles.btnPrimary, display: 'inline-block' }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#B07D2E';
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#C8973A';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                  >
-                    Daftar Sekarang
-                  </Link>
-                </>
+          {/* ── Desktop Nav ── */}
+          <div className="desktop-nav">
+            <NavLink href="/" active={isActive('/')}>{t.beranda}</NavLink>
+
+            <div ref={tentangRef} style={{ position: 'relative' }}>
+              <NavButton
+                label={t.tentang}
+                isOpen={tentangOpen}
+                active={tentangActive}
+                onClick={() => setTentangOpen(v => !v)}
+                ariaControls="tentang-dropdown"
+              />
+              {tentangOpen && (
+                <DropdownPanel triggerRef={tentangRef} panelWidth={220} id="tentang">
+                  <div className="tentang-list">
+                    {tentangList.map(it => (
+                      <Link
+                        key={it.href}
+                        href={it.href}
+                        className="eskul-text-item"
+                        onClick={() => setTentangOpen(false)}
+                      >
+                        {it.nama}
+                      </Link>
+                    ))}
+                  </div>
+                </DropdownPanel>
               )}
             </div>
 
-            {/* ── Mobile Toggle ── */}
-            <button
-              onClick={() => setMobileOpen(v => !v)}
-              className={`hamburger mobile-toggle${mobileOpen ? ' is-open' : ''}`}
-              aria-expanded={mobileOpen}
-              aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
-              aria-controls="mobile-drawer"
-            >
-              <span />
-              <span />
-              <span />
-            </button>
+            <NavLink href="/jurusan" active={isActive('/jurusan')}>{t.jurusan}</NavLink>
+
+            <div ref={eskulRef} style={{ position: 'relative' }}>
+              <NavButton
+                label={t.eskul}
+                isOpen={eskulOpen}
+                active={eskulActive}
+                onClick={() => setEskulOpen(v => !v)}
+                ariaControls="eskul-dropdown"
+              />
+              {eskulOpen && (
+                <DropdownPanel triggerRef={eskulRef} panelWidth={480} id="eskul">
+                  <p style={{
+                    fontSize: 11,
+                    color: '#9CA3AF',
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    marginBottom: 12,
+                    paddingLeft: 2,
+                  }}>
+                    {t.eskulCount}
+                  </p>
+                  <div className="eskul-grid">
+                    {ESKUL_LIST.map(e => (
+                      <Link
+                        key={e.nama}
+                        href={e.href}
+                        className="eskul-text-item"
+                        onClick={() => setEskulOpen(false)}
+                      >
+                        {e.nama}
+                      </Link>
+                    ))}
+                  </div>
+                </DropdownPanel>
+              )}
+            </div>
+
+            <NavLink href="/prestasi" active={isActive('/prestasi')}>{t.prestasi}</NavLink>
+            <NavLink href="/berita" active={isActive('/berita')}>{t.berita}</NavLink>
           </div>
-        </div>
-      </nav>
+
+          {/* ── Bahasa + Daftar (Desktop) ── */}
+          <div className="desktop-auth">
+            <LangSwitch />
+            <a href={SPMB_URL} target="_blank" rel="noopener noreferrer" className="nav-cta">
+              {t.daftar}
+            </a>
+          </div>
+
+          {/* ── Mobile Toggle ── */}
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="mobile-toggle"
+            aria-expanded={mobileOpen}
+            aria-label="Buka menu"
+            aria-controls="mobile-drawer"
+          >
+            <span className="hamburger">
+              <span />
+              <span />
+              <span />
+            </span>
+          </button>
+        </nav>
+      </header>
 
       {/* ── Mobile Drawer (portal) ── */}
       {mounted && createPortal(
         <div
-          className={`drawer-root${mobileOpen ? ' is-open' : ''}`}
+          className={`drawer-root notranslate${mobileOpen ? ' is-open' : ''}`}
           id="mobile-drawer"
           aria-hidden={!mobileOpen}
         >
@@ -756,11 +723,7 @@ export default function Navbar() {
 
           <aside className="drawer" role="dialog" aria-modal="true" aria-label="Menu navigasi">
             <div className="drawer-head">
-              <Link
-                href="/"
-                onClick={closeMobile}
-                style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}
-              >
+              <Link href="/" onClick={closeMobile} className="drawer-brand">
                 <Image
                   src="/images/logosma.png"
                   alt="Logo SMA Citra Negara"
@@ -768,61 +731,49 @@ export default function Navbar() {
                   height={36}
                   style={{ objectFit: 'contain' }}
                 />
-                <span style={{ color: '#fff', fontWeight: 800, fontSize: 15 }}>
-                  SMA Citra Negara
-                </span>
+                <span className="notranslate" translate="no">SMA Citra Negara</span>
               </Link>
+              <LangSwitch />
               <button className="drawer-close" onClick={closeMobile} aria-label="Tutup menu">
                 <X size={20} />
               </button>
             </div>
 
             <div className="drawer-body">
-              <Link href="/" className="m-item" onClick={closeMobile}>Beranda</Link>
+              <Link href="/" className={`m-item${isActive('/') ? ' is-active' : ''}`} onClick={closeMobile}>{t.beranda}</Link>
 
               <MobileAccordion
-                label="Tentang Kami"
-                items={TENTANG_LIST}
+                label={t.tentang}
+                items={tentangList}
                 isOpen={mobileTentang}
                 onToggle={() => setMobileTentang(v => !v)}
                 onNavigate={closeMobile}
               />
 
-              <Link href="/jurusan" className="m-item" onClick={closeMobile}>Bidang Studi</Link>
+              <Link href="/jurusan" className={`m-item${isActive('/jurusan') ? ' is-active' : ''}`} onClick={closeMobile}>{t.jurusan}</Link>
 
               <MobileAccordion
-                label="Ekstrakurikuler"
+                label={t.eskul}
                 items={ESKUL_LIST}
                 isOpen={mobileEskul}
                 onToggle={() => setMobileEskul(v => !v)}
                 onNavigate={closeMobile}
               />
 
-              <Link href="/prestasi" className="m-item" onClick={closeMobile}>Prestasi</Link>
-              <Link href="/berita" className="m-item" onClick={closeMobile}>Berita</Link>
-              <Link href="/spmb" className="m-item" onClick={closeMobile}>SPMB</Link>
+              <Link href="/prestasi" className={`m-item${isActive('/prestasi') ? ' is-active' : ''}`} onClick={closeMobile}>{t.prestasi}</Link>
+              <Link href="/berita" className={`m-item${isActive('/berita') ? ' is-active' : ''}`} onClick={closeMobile}>{t.berita}</Link>
             </div>
 
             <div className="drawer-foot">
-              {isLoading ? (
-                <div style={{ height: 46, background: 'rgba(255,255,255,0.06)', borderRadius: 10 }} />
-              ) : session ? (
-                <>
-                  <Link href={dashboardHref} className="m-btn m-btn-solid" onClick={closeMobile}>
-                    {session.namaLengkap || 'Dashboard'}
-                  </Link>
-                  <button className="m-btn m-btn-ghost" onClick={handleLogout}>Keluar</button>
-                </>
-              ) : (
-                <>
-                  <Link href="/register" className="m-btn m-btn-solid" onClick={closeMobile}>
-                    Daftar Sekarang
-                  </Link>
-                  <Link href="/login" className="m-btn m-btn-ghost" onClick={closeMobile}>
-                    Masuk
-                  </Link>
-                </>
-              )}
+              <a
+                href={SPMB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="m-cta"
+                onClick={closeMobile}
+              >
+                {t.daftar}
+              </a>
             </div>
           </aside>
         </div>,
@@ -834,20 +785,9 @@ export default function Navbar() {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  const [isHovered, setIsHovered] = useState(false);
-
+function NavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link
-      href={href}
-      style={{
-        ...styles.navLink,
-        color: isHovered ? '#C8973A' : 'rgba(255,255,255,0.85)',
-        background: isHovered ? 'rgba(200,151,58,0.1)' : 'transparent',
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <Link href={href} className={`nav-link${active ? ' is-active' : ''}`}>
       {children}
     </Link>
   );

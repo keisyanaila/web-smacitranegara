@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Newspaper } from 'lucide-react';
+import { ArrowLeft, Calendar, Newspaper, PenLine } from 'lucide-react';
 import type { BeritaItem } from '@/app/berita/data';
 import { KATEGORI_COLOR } from '@/app/berita/data';
 
@@ -79,6 +79,13 @@ export default function BeritaDetail({ item, related }: { item: BeritaItem; rela
               <Calendar size={15} />
               {item.tanggalLabel}
             </span>
+
+            {item.penulis && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: GRAY, fontSize: 14 }}>
+                <PenLine size={15} />
+                {item.penulis}
+              </span>
+            )}
           </div>
 
           <h1 className="font-display" style={{ fontSize: 34, color: NAVY, lineHeight: 1.3, marginBottom: 26 }}>

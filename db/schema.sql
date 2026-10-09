@@ -20,10 +20,14 @@ CREATE TABLE IF NOT EXISTS berita (
   ringkasan   TEXT NOT NULL DEFAULT '',
   konten      TEXT NOT NULL DEFAULT '',   -- antar paragraf dipisah satu baris kosong
   foto        TEXT NOT NULL DEFAULT '',   -- data URL (base64) atau path/URL gambar
+  penulis     TEXT NOT NULL DEFAULT 'Humas SMA Citra Negara',
   published   BOOLEAN NOT NULL DEFAULT TRUE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Kolom tambahan untuk database yang dibuat sebelum kolom ini ada.
+ALTER TABLE berita ADD COLUMN IF NOT EXISTS penulis TEXT NOT NULL DEFAULT 'Humas SMA Citra Negara';
 
 CREATE INDEX IF NOT EXISTS berita_tanggal_idx ON berita (tanggal DESC);
 
@@ -43,6 +47,25 @@ CREATE TABLE IF NOT EXISTS prestasi (
 );
 
 CREATE INDEX IF NOT EXISTS prestasi_tahun_idx ON prestasi (tahun DESC);
+
+-- ── Pengaturan (key-value) ──────────────────────────────────────────────────
+-- Saat ini dipakai untuk kunci 'spmb': { "tahunAjaran": "2027/2028",
+--   "gelombang": [{ "nama": "Gelombang 1", "mulai": "2026-09-01", "selesai": "2026-11-30" }, ...] }
+-- Diubah dari halaman /admin/spmb.
+CREATE TABLE IF NOT EXISTS pengaturan (
+  kunci       TEXT PRIMARY KEY,
+  nilai       JSONB NOT NULL,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+INSERT INTO pengaturan (kunci, nilai) VALUES (
+  'spmb',
+  '{"tahunAjaran":"2027/2028","gelombang":[
+     {"nama":"Gelombang 1","mulai":"2026-09-01","selesai":"2026-11-30"},
+     {"nama":"Gelombang 2","mulai":"2026-12-01","selesai":"2027-02-28"},
+     {"nama":"Gelombang 3","mulai":"2027-03-01","selesai":"2027-06-30"}]}'::jsonb
+)
+ON CONFLICT (kunci) DO NOTHING;
 
 -- ── Seed berita (dari data lama app/berita/data.ts) ─────────────────────────
 INSERT INTO berita (slug, judul, tanggal, kategori, ringkasan, konten, foto) VALUES

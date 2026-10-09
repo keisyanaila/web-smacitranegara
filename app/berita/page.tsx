@@ -2,6 +2,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import BeritaBrowser from '@/components/berita/BeritaBrowser';
 import { getBeritaList } from '@/lib/berita';
+import { withPublicFoto } from '@/lib/foto';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,7 @@ export default async function BeritaPage() {
   return (
     <>
       <Navbar />
-      <BeritaBrowser items={berita} />
+      <BeritaBrowser items={berita.map((b) => withPublicFoto('berita', b))} />
       <Footer />
     </>
   );

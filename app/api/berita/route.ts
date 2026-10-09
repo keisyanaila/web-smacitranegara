@@ -2,7 +2,7 @@ import { sql } from '@/lib/db';
 import { isAuthed } from '@/lib/auth';
 import { guardWrite, readJson, bad } from '@/lib/api';
 import { checkFoto } from '@/lib/upload';
-import { getBeritaList, rowToBerita, slugify, BERITA_KATEGORI } from '@/lib/berita';
+import { getBeritaList, rowToBerita, slugify, BERITA_KATEGORI, PENULIS_DEFAULT } from '@/lib/berita';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -36,6 +36,7 @@ export async function POST(request: Request) {
     : new Date().toISOString().slice(0, 10);
   const ringkasan = String(body.ringkasan ?? '').trim();
   const konten = String(body.konten ?? '').trim();
+  const penulis = String(body.penulis ?? '').trim().slice(0, 80) || PENULIS_DEFAULT;
   const published = body.published !== false;
 
   const foto = checkFoto(body.foto);
@@ -51,8 +52,8 @@ export async function POST(request: Request) {
   }
 
   const rows = await db`
-    INSERT INTO berita (slug, judul, tanggal, kategori, ringkasan, konten, foto, published)
-    VALUES (${slug}, ${judul}, ${tanggal}, ${kategori}, ${ringkasan}, ${konten}, ${foto.value}, ${published})
+    INSERT INTO berita (slug, judul, tanggal, kategori, ringkasan, konten, foto, penulis, published)
+    VALUES (${slug}, ${judul}, ${tanggal}, ${kategori}, ${ringkasan}, ${konten}, ${foto.value}, ${penulis}, ${published})
     RETURNING *`;
 
   return Response.json({ item: rowToBerita(rows[0]) }, { status: 201 });

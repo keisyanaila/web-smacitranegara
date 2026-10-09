@@ -17,7 +17,7 @@ export default function PrestasiBrowser({ items }: { items: PrestasiItem[] }) {
   return (
     <main>
       {/* Hero */}
-      <section className="hero-gradient" style={{ padding: '80px 24px' }}>
+      <section className="hero-gradient" style={{ padding: '116px 24px 80px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
           <div className="gold-line" style={{ margin: '0 auto 20px' }} />
           <h1 className="font-display" style={{ fontSize: 48, color: 'white', marginBottom: 16 }}>

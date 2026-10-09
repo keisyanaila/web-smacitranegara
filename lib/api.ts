@@ -1,5 +1,6 @@
 import { isAuthed } from './auth';
 import { sql } from './db';
+import { ensureSchema } from './db-migrate';
 
 /** Return Response 401/503 kalau tidak boleh menulis; null kalau lolos. */
 export async function guardWrite(): Promise<Response | null> {
@@ -12,6 +13,7 @@ export async function guardWrite(): Promise<Response | null> {
       { status: 503 }
     );
   }
+  await ensureSchema();
   return null;
 }
 

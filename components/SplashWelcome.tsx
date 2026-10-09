@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import styles from "./SplashWelcome.module.css";
 
 interface SplashWelcomeProps {
@@ -40,11 +41,13 @@ export default function SplashWelcome({
 }: SplashWelcomeProps) {
   // Selalu mulai dari "tampil penuh" (true = default render, bukan null).
   // Ini mencegah halaman di belakangnya sempat mengintip sebelum JS jalan.
+  const isAdmin = usePathname()?.startsWith("/admin") ?? false;
   const [hiding, setHiding] = useState(false);
   const [instant, setInstant] = useState(false);
   const [done, setDone] = useState(false);
 
 useEffect(() => {
+  if (isAdmin) return;
   // Sudah selesai di page-load ini (remount StrictMode) atau sudah pernah
   // tampil di sesi ini → langsung sembunyikan tanpa animasi.
   if (splashFinishedThisLoad || (SHOW_ONCE && sessionStorage.getItem(SPLASH_KEY))) {
@@ -55,10 +58,15 @@ useEffect(() => {
     return;
   }
 
+  // Tahan animasi pembuka halaman (mis. hero beranda) selama splash menutupi layar.
+  const root = document.documentElement;
+  root.dataset.splash = 'on';
+
   let finishTimer: ReturnType<typeof setTimeout>;
 
   const timer = setTimeout(() => {
     setHiding(true);
+    delete root.dataset.splash;
     // Flag baru ditulis SETELAH splash tampil penuh, bukan di awal —
     // supaya remount cepat tidak meng-skip animasi.
     splashFinishedThisLoad = true;
@@ -73,13 +81,15 @@ useEffect(() => {
   return () => {
     clearTimeout(timer);
     clearTimeout(finishTimer);
+    delete root.dataset.splash;
   };
-}, [duration, fadeOutDuration, onFinish]);
+}, [duration, fadeOutDuration, onFinish, isAdmin]);
 
   const letters = useMemo(() => BRAND.split(""), []);
 
   // Baru unmount total setelah benar-benar selesai (termasuk fade-out).
-  if (done) return null;
+  // Panel admin tidak perlu splash.
+  if (done || isAdmin) return null;
 
   return (
     <div

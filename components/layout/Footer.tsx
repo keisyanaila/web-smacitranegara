@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { SPMB_URL } from '@/lib/spmb';
 import { GraduationCap, Phone, Mail, MapPin, Share2, MessageCircle, Play, Clock1, Clock2Icon, Clock12Icon } from 'lucide-react';
 import {
   FaInstagram,
@@ -157,10 +158,11 @@ export default function Footer() {
               { href: '/', label: 'Beranda' },
               { href: '/tentang', label: 'Tentang Kami' },
               { href: '/jurusan', label: 'Bidang studi' },
-              { href: '/spmb', label: 'SPMB Online' },
-              { href: '/login', label: 'Login Siswa' },
+              { href: SPMB_URL, label: 'SPMB Online' },
             ].map(link => (
-              <Link key={link.href} href={link.href} style={{
+              <Link key={link.href} href={link.href}
+                {...(link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                style={{
                 display: 'block', color: 'rgba(255,255,255,0.6)',
                 textDecoration: 'none', fontSize: 13, padding: '5px 0',
                 transition: 'color 0.2s',

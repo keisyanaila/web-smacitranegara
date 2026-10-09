@@ -131,7 +131,7 @@ function Reveal({
   children: React.ReactNode;
   delay?: number;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof React.JSX.IntrinsicElements;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const Component = Tag as any;
@@ -190,7 +190,7 @@ function CountUp({
 
   return (
     <div ref={ref} className="irma-stat-number">
-      {display}
+      <span className="notranslate" translate="no">{display}</span>
       {suffix}
     </div>
   );

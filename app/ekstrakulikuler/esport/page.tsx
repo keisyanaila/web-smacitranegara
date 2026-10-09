@@ -64,8 +64,8 @@ function Crosshair({ size = 56, className = '' }) {
 }
 
 /* ── generic "reveal on scroll" hook ── */
-function useInView(threshold = 0.25) {
-  const ref = useRef(null);
+function useInView<T extends HTMLElement = HTMLDivElement>(threshold = 0.25) {
+  const ref = useRef<T>(null);
   const [inView, setInView] = useState(false);
   useEffect(() => {
     const el = ref.current;
@@ -82,26 +82,26 @@ function useInView(threshold = 0.25) {
     obs.observe(el);
     return () => obs.disconnect();
   }, [threshold]);
-  return [ref, inView];
+  return [ref, inView] as const;
 }
 
 /* ── parses "30+" / "100%" / "2022" into an animatable number + suffix ── */
-function parseStat(value) {
+function parseStat(value: string) {
   const match = value.match(/^(\d+)(.*)$/);
   if (!match) return { num: 0, suffix: value };
   return { num: parseInt(match[1], 10), suffix: match[2] };
 }
 
-function StatCounter({ angka, label, inView, delay }) {
+function StatCounter({ angka, label, inView, delay }: { angka: string; label: string; inView: boolean; delay: number }) {
   const { num, suffix } = parseStat(angka);
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
     if (!inView) return;
-    let raf;
+    let raf = 0;
     const start = performance.now() + delay;
     const duration = 1100;
-    const tick = (now) => {
+    const tick = (now: number) => {
       const elapsed = now - start;
       if (elapsed < 0) {
         raf = requestAnimationFrame(tick);
@@ -119,7 +119,7 @@ function StatCounter({ angka, label, inView, delay }) {
   return (
     <div className="esp-stat">
       <div className="esp-stat-num">
-        {display}
+        <span className="notranslate" translate="no">{display}</span>
         {suffix}
       </div>
       <div className="esp-stat-label">{label}</div>

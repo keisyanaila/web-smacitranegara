@@ -172,7 +172,7 @@ function StatCounter({
   return (
     <div className="fts-stat">
       <div className="fts-stat-num">
-        {display}
+        <span className="notranslate" translate="no">{display}</span>
         {suffix}
       </div>
 

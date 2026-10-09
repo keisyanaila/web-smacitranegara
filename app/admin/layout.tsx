@@ -15,14 +15,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!authed) {
     return (
-      <div className="adm">
+      <div className="adm notranslate" translate="no">
         <LoginForm configured={authConfigured()} />
       </div>
     );
   }
 
   return (
-    <div className="adm">
+    <div className="adm notranslate" translate="no">
       <AdminShell hasDb={hasDb}>{children}</AdminShell>
     </div>
   );

@@ -108,7 +108,7 @@ function StatCounter({
 
   return (
     <div className="vli-stat">
-      <div className="vli-stat-num">{display}{suffix}</div>
+      <div className="vli-stat-num"><span className="notranslate" translate="no">{display}</span>{suffix}</div>
       <div className="vli-stat-label">{label}</div>
     </div>
   );

@@ -37,6 +37,8 @@ export default function LoginForm({ configured }: { configured: boolean }) {
   return (
     <div className="adm-login-wrap">
       <form className="adm-login" onSubmit={submit}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="adm-login-logo" src="/images/logosma.png" alt="" />
         <h1>Masuk Admin</h1>
         <p>SMA Citra Negara</p>
 

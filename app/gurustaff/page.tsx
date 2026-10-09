@@ -160,7 +160,7 @@ export default function StafPage() {
         </section>
 
         <style jsx global>{`
-          .staf-hero { padding: 72px 24px 56px; }
+          .staf-hero { padding: 116px 24px 56px; }
           .staf-hero-inner { max-width: 640px; margin: 0 auto; text-align: center; }
           .staf-hero-icon {
             width: 48px; height: 48px; border-radius: 14px;
