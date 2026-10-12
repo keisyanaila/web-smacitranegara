@@ -8,7 +8,7 @@ import { createHash } from 'crypto';
 // JANGAN dipakai untuk data admin: form admin butuh nilai foto asli supaya tidak
 // tertimpa URL ini saat disimpan ulang.
 
-export type FotoKind = 'berita' | 'prestasi';
+export type FotoKind = 'berita' | 'prestasi' | 'staf';
 
 export function publicFotoUrl(kind: FotoKind, id: number, foto: string): string {
   if (!foto.startsWith('data:')) return foto;

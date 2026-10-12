@@ -20,6 +20,8 @@ export async function GET(_req: Request, ctx: Ctx) {
     rows = await sql`SELECT foto FROM berita WHERE id = ${id} AND published = TRUE LIMIT 1`;
   } else if (kind === 'prestasi') {
     rows = await sql`SELECT foto FROM prestasi WHERE id = ${id} AND published = TRUE LIMIT 1`;
+  } else if (kind === 'staf') {
+    rows = await sql`SELECT foto FROM guru_staf WHERE id = ${id} AND published = TRUE LIMIT 1`;
   } else {
     return bad('Jenis tidak dikenal.', 404);
   }

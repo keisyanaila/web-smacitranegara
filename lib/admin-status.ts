@@ -12,6 +12,7 @@ const WAJIB: Record<string, string[]> = {
   berita: ['id', 'slug', 'judul', 'penulis', 'published'],
   prestasi: ['id', 'nama', 'siswa', 'published'],
   pengaturan: ['kunci', 'nilai', 'updated_at'],
+  guru_staf: ['id', 'nama', 'jabatan', 'kategori', 'published'],
 };
 
 const JALANKAN_SCHEMA = 'Jalankan ulang db/schema.sql di Neon SQL Editor.';

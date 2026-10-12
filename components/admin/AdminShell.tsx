@@ -11,6 +11,7 @@ import {
   Menu,
   Newspaper,
   Trophy,
+  Users,
 } from 'lucide-react';
 
 /* eslint-disable @next/next/no-img-element */
@@ -19,6 +20,7 @@ const LINKS = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/berita', label: 'Berita', icon: Newspaper },
   { href: '/admin/prestasi', label: 'Prestasi', icon: Trophy },
+  { href: '/admin/staf', label: 'Guru & Staf', icon: Users },
   { href: '/admin/spmb', label: 'Jadwal SPMB', icon: CalendarDays },
 ];
 

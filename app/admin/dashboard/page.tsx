@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { AlertTriangle, CalendarDays, CheckCircle2, Newspaper, Trophy, XCircle } from 'lucide-react';
+import { AlertTriangle, CalendarDays, CheckCircle2, Newspaper, Trophy, Users, XCircle } from 'lucide-react';
 import { cekSistem } from '@/lib/admin-status';
 import { getBeritaList } from '@/lib/berita';
 import { getPrestasiList } from '@/lib/prestasi';
+import { getStafList } from '@/lib/staf';
 import { getSpmbSetting } from '@/lib/spmb-db';
 import { ringkasanGelombang } from '@/lib/spmb';
 
@@ -20,10 +21,11 @@ async function hitung<T extends { published: boolean }>(load: () => Promise<T[]>
 }
 
 export default async function DashboardPage() {
-  const [status, berita, prestasi, spmb] = await Promise.all([
+  const [status, berita, prestasi, staf, spmb] = await Promise.all([
     cekSistem(),
     hitung(() => getBeritaList({ includeUnpublished: true })),
     hitung(() => getPrestasiList({ includeUnpublished: true })),
+    hitung(() => getStafList({ includeUnpublished: true })),
     getSpmbSetting(),
   ]);
 
@@ -76,6 +78,17 @@ export default async function DashboardPage() {
           </div>
           <p>Kelola daftar prestasi yang tampil di halaman /prestasi.</p>
           <span className="adm-stat-link">Kelola prestasi →</span>
+        </Link>
+
+        <Link href="/admin/staf" className="adm-stat">
+          <div className="adm-stat-icon"><Users size={19} /></div>
+          <h3>Guru &amp; Staf</h3>
+          <div className="adm-stat-num">
+            {staf ? staf.total : '–'}
+            <small>orang{staf && staf.draft > 0 ? ` · ${staf.draft} draft` : ''}</small>
+          </div>
+          <p>Kelola nama, jabatan, dan foto yang tampil di halaman Guru &amp; Staf.</p>
+          <span className="adm-stat-link">Kelola guru &amp; staf →</span>
         </Link>
 
         <Link href="/admin/spmb" className="adm-stat">

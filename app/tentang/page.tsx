@@ -6,54 +6,39 @@ import Footer from '@/components/layout/Footer';
 import { Target, Eye, ChevronDown, CalendarDays, GraduationCap, Users, Award } from 'lucide-react';
 
 /* ══════════════════════════════════════════
-   DATA STRUKTUR ORGANISASI (isi tidak diubah)
+   DATA STRUKTUR ORGANISASI — TA. 2026/2027
 ══════════════════════════════════════════ */
 type Orang = { nama: string; jabatan: string };
 type Departemen = { nama: string; jabatan: string; tim?: Orang[] };
 
-const KETUA_YATKJ: Orang = { nama: 'Dr. M. Rizki Darmaguna Hasan, S.Tr., M.Pd', jabatan: 'Ketua YATKJ' };
-const ADVISOR: Orang = { nama: 'Hj. Mutiah, S.Pd., MM', jabatan: 'Advisor BPH' };
-const KETUA_BPH: Orang = { nama: 'Agustin Wijayanti, S.H., MM', jabatan: 'Ketua BPH YATKJ' };
-const KETUA_KOMITE: Orang = { nama: 'Elly Kurniawati, S.H', jabatan: 'Ketua Komite' };
-const KEPSEK: Orang = { nama: 'Ahmad Taufik, S.Kom', jabatan: 'Kepala SMA Citra Negara' };
+const KEPSEK: Orang = { nama: 'Ahmad Taufik, S.Kom', jabatan: 'Kepala Sekolah' };
 
 const DEPARTEMEN: Departemen[] = [
   {
-    nama: 'Drs. Dedi Suandi, M.Pd', jabatan: 'Waka Kurikulum',
+    nama: 'Dedi Suandi, M.Pd.', jabatan: 'WAKA. Kurikulum',
     tim: [
-      { nama: 'Febia Maulina, S.Pd', jabatan: 'Kepala Lab IPA' },
-      { nama: 'Magreza Wahyu I, S.T', jabatan: 'Kepala Lab Komputer' },
+      { nama: 'Balqis Ananda Safitri, S.Pd.', jabatan: 'BK/BP' },
+      { nama: 'Febia Maulina, S.Pd.', jabatan: 'Kepala Lab. IPA' },
+      { nama: 'Muhammad Aditya, S.Ti.', jabatan: 'Kepala Lab. Komputer' },
     ],
   },
   {
-    nama: 'Andri Prihadi, S.T', jabatan: 'Waka Kesiswaan',
+    nama: 'Abdul Hakim, S.Pd.', jabatan: 'WAKA. Kesiswaan/Humas',
     tim: [
-      { nama: 'Sylviana, SE, S.Sos, M.Pd.I', jabatan: 'Pembina OSIS' },
-      { nama: 'Samsul Bahri, S.Pd', jabatan: 'Pembina IRMA' },
-      { nama: 'Annisa Larasati, Sos', jabatan: 'Pembina NAKAMA' },
-      { nama: 'Balqis Ananda Safitri, S.Pd', jabatan: 'Guru BK' },
+      { nama: 'Sylviana, M.Pd.', jabatan: 'Pembina OSIS' },
+      { nama: 'Samsul Bahri, S.Pd.I.', jabatan: 'Pembina IRMA' },
     ],
   },
   {
-    nama: 'Riki Yakub, S.Kom', jabatan: 'Waka Sapras',
+    nama: 'Nindi Tiarawati, S.Pd.', jabatan: 'KA. TU. Administrasi',
     tim: [
-      { nama: 'Riza Febriansyah', jabatan: 'Office Boy' },
-      { nama: 'Haris Isyanto', jabatan: 'Security' },
-    ],
-  },
-  { nama: 'Ir. Lukman Kharis, M.Pd', jabatan: 'Waka Humas' },
-  {
-    nama: 'Decky Ryansyah, M.Kom', jabatan: 'Kepala IT',
-    tim: [{ nama: 'Ilham Nur Fajril', jabatan: 'Teknisi' }],
-  },
-  {
-    nama: 'Nindi Tiarawati, S.Pd', jabatan: 'Kepala Tata Usaha',
-    tim: [
-      { nama: 'Syafangatul Karim, S.Pd', jabatan: 'Bendahara' },
-      { nama: 'Lia Lestari', jabatan: 'Sekretaris Tata Usaha' },
+      { nama: 'Syafangatul Karim, S.Pd.', jabatan: 'Bendahara BOS/Dapodik dan Takola' },
+      { nama: 'Narfa Eka Syabila', jabatan: 'Tata Usaha Administrasi' },
     ],
   },
 ];
+
+const GURU_LABEL = 'Guru Mata Pelajaran dan Wali Kelas';
 
 const STATS = [
   { icon: CalendarDays, to: 2024, suffix: '', label: 'Tahun Berdiri' },
@@ -199,9 +184,9 @@ const CSS = `
   .struktur-toggle button svg { transition: transform .3s ease; }
   .struktur-toggle button.open svg { transform: rotate(180deg); }
 
-  /* ── Struktur diagram (gaya SMK: Box / VLine / HLine) ── */
+  /* ── Struktur diagram (gaya SMK: Box / VLine) ── */
   .struktur-section { padding: 40px 16px 70px; background: #fff; overflow-x: auto; }
-  .struktur-tree { min-width: 1100px; }
+  .struktur-tree { min-width: 860px; }
   .struktur-hint { display: none; }
   .struktur-box {
     border-radius: 9px; padding: 8px 14px; text-align: center;
@@ -223,7 +208,7 @@ const CSS = `
     .sec-title { font-size: 26px; }
     .vm-panel { padding: 26px 22px; }
     .struktur-hint { display: block; }
-    .struktur-tree { min-width: 900px; }
+    .struktur-tree { min-width: 720px; }
     .struktur-box { min-width: 128px; max-width: 170px; padding: 7px 10px; }
     .struktur-box-wide { min-width: 190px; max-width: 220px; }
     .struktur-box-name { font-size: 11px; }
@@ -232,7 +217,7 @@ const CSS = `
   @media (max-width: 480px) {
     .hero-title { font-size: 24px; }
     .stat-strip { grid-template-columns: 1fr 1fr; }
-    .struktur-tree { min-width: 760px; }
+    .struktur-tree { min-width: 600px; }
     .struktur-box { min-width: 112px; max-width: 150px; padding: 6px 8px; }
     .struktur-box-wide { min-width: 170px; max-width: 200px; }
     .struktur-box-name { font-size: 10.5px; }
@@ -331,9 +316,6 @@ function Box({ name, label, variant = 'default', wide = false }: {
 const VLine = ({ h = 18 }: { h?: number }) => (
   <div style={{ width: 2, height: h, background: '#C8973A', alignSelf: 'center', flexShrink: 0 }} />
 );
-const HLine = ({ w = 32 }: { w?: number }) => (
-  <div style={{ height: 2, width: w, background: '#C8973A', alignSelf: 'center', flexShrink: 0 }} />
-);
 function VCol({ children }: { children: React.ReactNode }) {
   return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>{children}</div>;
 }
@@ -346,39 +328,39 @@ function StrukturDiagram() {
           ← Geser untuk melihat struktur lengkap →
         </p>
         <div className="struktur-tree" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Box name={KETUA_YATKJ.nama} label={KETUA_YATKJ.jabatan} variant="gold" wide />
-            <HLine w={40} />
-            <Box name={ADVISOR.nama} label={ADVISOR.jabatan} />
-          </div>
-          <VLine />
-          <Box name={KETUA_BPH.nama} label={KETUA_BPH.jabatan} />
-          <VLine />
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Box name={KETUA_KOMITE.nama} label={KETUA_KOMITE.jabatan} variant="cream" />
-            <HLine w={32} />
-            <Box name={KEPSEK.nama} label={KEPSEK.jabatan} variant="dark" wide />
-          </div>
+          <Box name={KEPSEK.nama} label={KEPSEK.jabatan} variant="dark" wide />
           <VLine h={24} />
-          <div style={{ display: 'flex', alignItems: 'flex-start', width: '100%', justifyContent: 'space-between', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: 0, left: '8%', right: '8%', height: 2, background: '#C8973A' }} />
+          {/* 3 kolom sama lebar → titik tengah kolom di 1/6, 3/6, 5/6 lebar baris */}
+          <div style={{ display: 'flex', alignItems: 'stretch', width: '100%', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: 0, left: `${50 / DEPARTEMEN.length}%`, right: `${50 / DEPARTEMEN.length}%`, height: 2, background: '#C8973A' }} />
             {DEPARTEMEN.map((d, i) => (
-              <VCol key={i}>
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <VLine h={16} />
-                <Box name={d.nama} label={d.jabatan} />
+                <Box name={d.nama} label={d.jabatan} wide />
                 {!!d.tim?.length && (
                   <>
                     <VLine />
                     {d.tim.map((t, j) => (
-                      <div key={j} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <VCol key={j}>
                         {j > 0 && <VLine h={10} />}
-                        <Box name={t.nama} label={t.jabatan} variant="cream" />
-                      </div>
+                        <Box name={t.nama} label={t.jabatan} variant="cream" wide />
+                      </VCol>
                     ))}
                   </>
                 )}
-              </VCol>
+                {/* garis turun sampai kotak guru di bawah */}
+                <div style={{ width: 2, flex: 1, minHeight: 24, background: '#C8973A' }} />
+              </div>
             ))}
+          </div>
+          <div
+            className="struktur-box"
+            style={{
+              width: `${100 - 100 / DEPARTEMEN.length + 12}%`, maxWidth: 'none', textAlign: 'center',
+              background: '#023d17', border: '1.5px solid #C8973A',
+            }}
+          >
+            <div className="struktur-box-name" style={{ color: 'white', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{GURU_LABEL}</div>
           </div>
         </div>
       </div>

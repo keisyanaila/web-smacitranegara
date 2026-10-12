@@ -48,6 +48,20 @@ CREATE TABLE IF NOT EXISTS prestasi (
 
 CREATE INDEX IF NOT EXISTS prestasi_tahun_idx ON prestasi (tahun DESC);
 
+-- ── Guru & Staf ─────────────────────────────────────────────────────────────
+-- Data awal (struktur organisasi TA. 2026/2027) diisi otomatis sekali oleh
+-- lib/db-migrate.ts, jadi tidak di-seed di sini.
+CREATE TABLE IF NOT EXISTS guru_staf (
+  id          SERIAL PRIMARY KEY,
+  nama        TEXT NOT NULL,
+  jabatan     TEXT NOT NULL DEFAULT '',
+  kategori    TEXT NOT NULL DEFAULT 'Guru',
+  foto        TEXT NOT NULL DEFAULT '',
+  published   BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 -- ── Pengaturan (key-value) ──────────────────────────────────────────────────
 -- Saat ini dipakai untuk kunci 'spmb': { "tahunAjaran": "2027/2028",
 --   "gelombang": [{ "nama": "Gelombang 1", "mulai": "2026-09-01", "selesai": "2026-11-30" }, ...] }

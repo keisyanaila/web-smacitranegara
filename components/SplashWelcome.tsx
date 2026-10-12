@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import styles from "./SplashWelcome.module.css";
 
@@ -45,6 +45,8 @@ export default function SplashWelcome({
   const [hiding, setHiding] = useState(false);
   const [instant, setInstant] = useState(false);
   const [done, setDone] = useState(false);
+  // Diisi oleh effect di bawah; dipanggil saat splash diklik untuk langsung masuk.
+  const skipRef = useRef<() => void>(() => {});
 
 useEffect(() => {
   if (isAdmin) return;
@@ -63,8 +65,12 @@ useEffect(() => {
   root.dataset.splash = 'on';
 
   let finishTimer: ReturnType<typeof setTimeout>;
+  let finished = false;
 
-  const timer = setTimeout(() => {
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    clearTimeout(timer);
     setHiding(true);
     delete root.dataset.splash;
     // Flag baru ditulis SETELAH splash tampil penuh, bukan di awal —
@@ -76,9 +82,20 @@ useEffect(() => {
       setDone(true);
       onFinish?.();
     }, fadeOutDuration);
-  }, duration);
+  };
+
+  const timer = setTimeout(finish, duration);
+  skipRef.current = finish;
+
+  // Enter / Spasi / Esc juga langsung masuk.
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " " || e.key === "Escape") finish();
+  };
+  window.addEventListener("keydown", onKey);
 
   return () => {
+    window.removeEventListener("keydown", onKey);
+    skipRef.current = () => {};
     clearTimeout(timer);
     clearTimeout(finishTimer);
     delete root.dataset.splash;
@@ -99,6 +116,8 @@ useEffect(() => {
       aria-hidden={hiding}
       role="status"
       aria-live="polite"
+      onClick={() => skipRef.current()}
+      title="Klik untuk masuk"
     >
       <div className={styles.auroraA} />
       <div className={styles.auroraB} />
@@ -134,6 +153,8 @@ useEffect(() => {
           <span />
           <span />
         </div>
+
+        <p className={styles.skipHint}>Ketuk untuk masuk</p>
       </div>
     </div>
   );
