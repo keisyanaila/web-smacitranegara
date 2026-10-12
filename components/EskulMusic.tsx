@@ -29,7 +29,11 @@ export default function EskulMusic({
     audio.volume = volume;
 
     let cleaned = false;
-    const KICKS = ['pointerdown', 'pointermove', 'keydown', 'scroll', 'touchstart', 'mouseover', 'wheel'];
+    let trying = false;
+    // Event yang dihitung browser sebagai "interaksi pengguna" (termasuk tap di HP:
+    // touchend / pointerup / click). Event yang sangat sering seperti pointermove &
+    // mouseover tidak dipakai supaya play() tidak dipanggil ratusan kali per detik.
+    const KICKS = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown', 'scroll', 'wheel'];
 
     const removeKick = () => {
       KICKS.forEach((ev) => window.removeEventListener(ev, onKick));
@@ -37,14 +41,18 @@ export default function EskulMusic({
     };
     stopAutoKickRef.current = removeKick;
 
-    const tryPlay = () =>
+    const tryPlay = () => {
+      if (trying || !audio.paused) return;
+      trying = true;
       audio
         .play()
         .then(() => {
           if (!cleaned) setPlaying(true);
           removeKick();
         })
-        .catch(() => {});
+        .catch(() => {})
+        .finally(() => { trying = false; });
+    };
 
     const onKick = () => tryPlay();
     const onVis = () => { if (document.visibilityState === 'visible') tryPlay(); };
@@ -81,7 +89,8 @@ export default function EskulMusic({
 
   return (
     <>
-      <audio ref={audioRef} src={src} loop preload="auto" />
+      {/* preload="none": file lagu baru diunduh saat mulai diputar, tidak membebani load awal di HP */}
+      <audio ref={audioRef} src={src} loop preload="none" />
 
       <button
         type="button"

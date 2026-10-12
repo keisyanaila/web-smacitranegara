@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import EskulMusic from '@/components/EskulMusic';
 import Image from 'next/image';
 
 const STATS = [
@@ -42,6 +41,7 @@ export default function TheaterPage() {
     items.forEach((item) => observer.observe(item));
 
     // Coba langsung menyalakan musik saat halaman/tab Theater dibuka.
+    const audioEl = audioRef.current;
     // Jika browser memblokir autoplay, musik akan mulai setelah interaksi pertama pengguna.
     const startMusic = async () => {
       const audio = audioRef.current;
@@ -54,28 +54,25 @@ export default function TheaterPage() {
         await audio.play();
         setPlaying(true);
       } catch {
-        const resumeAfterInteraction = async () => {
-          try {
-            await audio.play();
-            setPlaying(true);
-          } catch {
-            setPlaying(false);
-          }
-          window.removeEventListener('pointerdown', resumeAfterInteraction);
-          window.removeEventListener('keydown', resumeAfterInteraction);
-          window.removeEventListener('touchstart', resumeAfterInteraction);
-        };
-
-        window.addEventListener('pointerdown', resumeAfterInteraction, { once: true });
-        window.addEventListener('keydown', resumeAfterInteraction, { once: true });
-        window.addEventListener('touchstart', resumeAfterInteraction, { once: true });
+        // di HP, tap baru dihitung "interaksi" pada touchend/pointerup/click — bukan pointerdown/touchstart
+        KICKS.forEach((ev) => window.addEventListener(ev, resumeAfterInteraction, { passive: true }));
       }
+    };
+
+    const KICKS = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'];
+    const removeKick = () => KICKS.forEach((ev) => window.removeEventListener(ev, resumeAfterInteraction));
+    const resumeAfterInteraction = () => {
+      const audio = audioRef.current;
+      if (!audio || !audio.paused) return removeKick();
+      audio.play().then(() => { setPlaying(true); removeKick(); }).catch(() => {});
     };
 
     startMusic();
 
     return () => {
       observer.disconnect();
+      removeKick();
+      audioEl?.pause();
     };
   }, []);
 
@@ -228,7 +225,6 @@ export default function TheaterPage() {
             </div>
           </section>
         </main>
-        <EskulMusic src="/audio/theater.mp3" />
         <Footer />
       </div>
     </>

@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import EskulMusic from '@/components/EskulMusic';
 import Image from 'next/image';
 
 const STATS = [
@@ -156,19 +155,19 @@ export default function BandPage() {
     };
     tryPlay();
 
+    // di HP, tap baru dihitung "interaksi" pada touchend/pointerup/click — bukan pointerdown
+    const KICKS = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'];
+    const removeKick = () => KICKS.forEach((ev) => window.removeEventListener(ev, startOnInteract));
     const startOnInteract = () => {
-      audio.play().then(() => setIsPlaying(true)).catch(() => {});
-      window.removeEventListener('pointerdown', startOnInteract);
-      window.removeEventListener('keydown', startOnInteract);
+      if (!audio.paused) return removeKick();
+      audio.play().then(() => { setIsPlaying(true); removeKick(); }).catch(() => {});
     };
-    window.addEventListener('pointerdown', startOnInteract, { once: true });
-    window.addEventListener('keydown', startOnInteract, { once: true });
+    KICKS.forEach((ev) => window.addEventListener(ev, startOnInteract, { passive: true }));
 
     return () => {
-      window.removeEventListener('pointerdown', startOnInteract);
-      window.removeEventListener('keydown', startOnInteract);
+      removeKick();
+      audio.pause();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleAudio = () => {
@@ -731,7 +730,7 @@ export default function BandPage() {
       `}</style>
 
       <div className="psk-root">
-        <audio ref={audioRef} src={AUDIO_SRC} loop preload="auto" />
+        <audio ref={audioRef} src={AUDIO_SRC} loop preload="none" />
 
         <Navbar />
 
@@ -877,7 +876,6 @@ export default function BandPage() {
           </section>
         </main>
 
-        <EskulMusic src="/audio/musikband.mp3" />
         <Footer />
 
         <button

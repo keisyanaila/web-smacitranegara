@@ -1,0 +1,54 @@
+/*
+ * Optimasi performa halaman ekstrakurikuler.
+ * Animasi tetap ada — hanya yang tidak terlihat dijeda, dan efek
+ * yang mahal di GPU HP (blur, blend, filter beranimasi) disederhanakan.
+ */
+
+/* Section di luar layar: jeda semua animasi (lanjut lagi saat terlihat). */
+[data-eskul-off],
+[data-eskul-off] *,
+[data-eskul-off] *::before,
+[data-eskul-off] *::after {
+  animation-play-state: paused !important;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  /* backdrop-filter sangat berat di HP; latar semi-transparan tetap terlihat. */
+  .gakuen-root *,
+  .thr-root * {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Gambar hero yang bernapas/zoom terus: pindahkan ke layer GPU sendiri. */
+  .thr-hero-img img,
+  .tkw-hero-img img {
+    will-change: transform;
+  }
+
+  /* Lampu panggung theater: mix-blend-mode memaksa compositing seluruh hero. */
+  .thr-stage-light {
+    mix-blend-mode: normal !important;
+    opacity: 0.55;
+    will-change: transform;
+  }
+
+  /* Glow esport: keyframe aslinya menganimasikan drop-shadow (repaint tiap frame).
+     Ganti dengan denyut skala saja — gerakannya sama, glow-nya statis. */
+  .esp-cross-float {
+    animation-name: eskulPulse !important;
+    filter: drop-shadow(0 0 10px rgba(124, 106, 250, 0.55)) !important;
+  }
+
+  /* Elemen beranimasi dengan drop-shadow: rasterisasi sekali, lalu cukup digeser. */
+  .fts-ball,
+  .tari-petal,
+  .sakura {
+    will-change: transform;
+  }
+}
+
+@keyframes eskulPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
