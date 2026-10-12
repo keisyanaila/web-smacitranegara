@@ -80,7 +80,6 @@ function Ring({ pct }: { pct: number }) {
 
 function Bento() {
   const gridRef = useSpotlight<HTMLDivElement>('.h-tile');
-  const { ref: barRef, inView: barIn } = useInView<HTMLDivElement>();
 
   return (
     <div className="h-bento" ref={gridRef}>
@@ -117,8 +116,9 @@ function Bento() {
       <Reveal className="h-tile h-tile-wide h-tile-dark" delay={80}>
         <div className="h-dots" aria-hidden="true" />
         <GraduationCap className="h-tile-icon" size={26} />
-        <div className="h-tile-num font-display"><Counter value="5.000+" duration={1800} /></div>
-        <span className="h-tile-label">Alumni tersebar di seluruh Indonesia</span>
+        {/* Tahun ditulis biasa (bukan Counter) supaya tidak jadi "2.024". */}
+        <div className="h-tile-num font-display notranslate" translate="no">2024</div>
+        <span className="h-tile-label">Tahun berdiri · angkatan perdana sedang tumbuh bersama kami</span>
       </Reveal>
 
       <Reveal className="h-tile h-tile-wide" delay={140}>
@@ -135,15 +135,12 @@ function Bento() {
       <Reveal className="h-tile h-tile-wide" delay={200}>
         <div className="h-tile-row">
           <div>
-            <span className="h-tile-label">Tingkat kelulusan</span>
-            <div className="h-tile-num font-display"><Counter value="98%" /></div>
+            <span className="h-tile-label">Ekstrakurikuler</span>
+            <div className="h-tile-num font-display"><Counter value="13+" /></div>
           </div>
           <Trophy className="h-tile-icon" size={26} />
         </div>
-        <div ref={barRef} className={`h-meter${barIn ? ' is-in' : ''}`} style={{ '--v': 0.98 } as React.CSSProperties}>
-          <span />
-        </div>
-        <p>85% lulusan diterima di PTN & kampus top.</p>
+        <p>Olahraga, seni, bela diri, hingga organisasi — wadah bakat di luar kelas.</p>
       </Reveal>
     </div>
   );
@@ -191,7 +188,7 @@ function FinalCta({ ta }: { ta: string }) {
         </div>
         <ul className="h-cta-trust">
           <li><Award size={15} /> Akreditasi A</li>
-          <li><GraduationCap size={15} /> 85% ke PTN top</li>
+          <li><GraduationCap size={15} /> Peminatan IPA & IPS</li>
           <li><Sparkles size={15} /> 13+ ekstrakurikuler</li>
         </ul>
       </Reveal>

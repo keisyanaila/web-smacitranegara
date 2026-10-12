@@ -10,8 +10,8 @@ import { Counter, RotatingWord, useFancyPointer, useMagnetic } from './fx';
 
 const STATS = [
   { value: '1.200+', label: 'Siswa Aktif' },
-  { value: '98%', label: 'Tingkat Kelulusan' },
-  { value: '85%', label: 'Keterima PTN Top' },
+  { value: '2', label: 'Peminatan IPA & IPS' },
+  { value: '13+', label: 'Ekstrakurikuler' },
   { value: '3+', label: 'Tahun Berdiri' },
 ];
 
@@ -211,7 +211,7 @@ export default function Hero({ spmb }: { spmb: SpmbSetting }) {
           </h1>
 
           <p className="h-desc h-in" style={{ '--i': 9 } as React.CSSProperties}>
-            Bergabunglah dengan ribuan alumni sukses. Pendidikan berkualitas tinggi dengan kurikulum terkini,
+            Jadilah bagian dari angkatan-angkatan pertama SMA Citra Negara. Pendidikan berkualitas tinggi dengan kurikulum terkini,
             fasilitas modern, dan lingkungan yang mendukung kamu tumbuh.
           </p>
 
