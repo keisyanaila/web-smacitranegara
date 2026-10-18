@@ -109,7 +109,7 @@ function Bento() {
 
       <Reveal className="h-tile" delay={140}>
         <FlaskConical className="h-tile-icon" size={26} />
-        <div className="h-tile-num font-display"><Counter value="50+" /></div>
+        <div className="h-tile-num font-display">Lab Lengkap</div>
         <p>Fasilitas lab untuk praktik langsung tiap jurusan.</p>
       </Reveal>
 

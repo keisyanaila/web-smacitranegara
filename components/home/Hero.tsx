@@ -9,7 +9,7 @@ import { labelRentang, tahunMulai, SPMB_URL, type Gelombang, type SpmbSetting } 
 import { Counter, RotatingWord, useFancyPointer, useMagnetic } from './fx';
 
 const STATS = [
-  { value: '1.200+', label: 'Siswa Aktif' },
+  { value: '370+', label: 'Siswa Aktif' },
   { value: '2', label: 'Peminatan IPA & IPS' },
   { value: '13+', label: 'Ekstrakurikuler' },
   { value: '3+', label: 'Tahun Berdiri' },
@@ -251,7 +251,7 @@ export default function Hero({ spmb }: { spmb: SpmbSetting }) {
         <div className="h-hero-side h-in" style={{ '--i': 6 } as React.CSSProperties}>
           <div className="h-chip h-chip-1"><Award size={15} /> Akreditasi A</div>
           <div className="h-chip h-chip-2"><Wifi size={15} /> Starlink 1 Gbps</div>
-          <div className="h-chip h-chip-3"><FlaskConical size={15} /> 50+ Fasilitas Lab</div>
+          <div className="h-chip h-chip-3"><FlaskConical size={15} /> Lab Lengkap</div>
 
           <div className="h-tl-card">
             <div className="h-tl-head">
