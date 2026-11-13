@@ -213,11 +213,18 @@ export default function Footer() {
           flexWrap: 'wrap',
           gap: 10,
         }}>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
-            © 2026 SMA Citra Negara. All rights reserved.
-          </p>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
-            ©2026 Developed by Keisya Naila Azmika. Respect the code
+           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
+  ©2026 Developed by{' '}
+  <a
+    href="https://www.instagram.com/nneyl0v/"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{ color: 'inherit', textDecoration: 'none' }}
+  >
+    Keisya Naila Azmika
+  </a>
+  . Respect the code
+
           </p>
         </div>
       </div>
